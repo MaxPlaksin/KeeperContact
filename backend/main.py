@@ -10,6 +10,7 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 import os
 import shutil
+from fastapi.middleware.cors import CORSMiddleware
 
 DATABASE_URL = 'sqlite:///./contacts.db'
 SECRET_KEY = 'supersecretkey'  # В проде вынести в env
@@ -125,6 +126,19 @@ def get_current_admin(current_user: UserDB = Depends(get_current_user)):
     return current_user
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post('/register', response_model=User)
 def register(user: UserCreate, db: Session = Depends(get_db)):

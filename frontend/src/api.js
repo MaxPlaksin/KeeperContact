@@ -19,7 +19,11 @@ export async function login(username, password) {
   const params = new URLSearchParams();
   params.append('username', username);
   params.append('password', password);
-  const res = await axios.post(`${API_URL}/token`, params);
+  const res = await axios.post(
+    `${API_URL}/token`,
+    params,
+    { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+  );
   return res.data;
 }
 
@@ -49,4 +53,4 @@ export async function uploadPhoto(contactId, file) {
 
 export function getPhotoUrl(filename) {
   return `${API_URL}/photos/${filename}`;
-} 
+}

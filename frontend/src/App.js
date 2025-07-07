@@ -14,6 +14,7 @@ import ContactList from './ContactList';
 import ContactForm from './ContactForm';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
+import { Card, CardContent, Avatar, Typography, Box, Button, TextField, Grid } from '@mui/material';
 
 function Notification({ message, onClose }) {
   useEffect(() => {
@@ -135,30 +136,54 @@ function AuthPage({ setUser, setToken }) {
   }
 
   return (
-    <div className="App">
-      <h1>{authMode === 'login' ? 'Вход' : 'Регистрация'}</h1>
-      <form onSubmit={handleAuth}>
-        <input
-          type="text"
-          placeholder="Имя пользователя"
-          value={authForm.username}
-          onChange={e => setAuthForm(f => ({ ...f, username: e.target.value }))}
-          required
-        /><br />
-        <input
-          type="password"
-          placeholder="Пароль"
-          value={authForm.password}
-          onChange={e => setAuthForm(f => ({ ...f, password: e.target.value }))}
-          required
-        /><br />
-        <button type="submit">{authMode === 'login' ? 'Войти' : 'Зарегистрироваться'}</button>
-      </form>
-      <button onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}>
-        {authMode === 'login' ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'}
-      </button>
-      {error && <p style={{ color: 'red' }}>{DOMPurify.sanitize(error)}</p>}
-    </div>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#f0f4f8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Card sx={{ minWidth: 350, maxWidth: 400, p: 3, boxShadow: 3 }}>
+        <CardContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
+            <Avatar src="/logo_agb.png" sx={{ width: 80, height: 80, mb: 2 }} />
+            <Typography variant="h5" fontWeight={700} mb={1}>
+              Алмазгеобур
+            </Typography>
+            <Typography variant="h6" fontWeight={500} mb={2}>
+              {authMode === 'login' ? 'Вход в систему' : 'Регистрация'}
+            </Typography>
+          </Box>
+          <form onSubmit={handleAuth}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  type="text"
+                  label="Имя пользователя"
+                  value={authForm.username}
+                  onChange={e => setAuthForm(f => ({ ...f, username: e.target.value }))}
+                  required
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  type="password"
+                  label="Пароль"
+                  value={authForm.password}
+                  onChange={e => setAuthForm(f => ({ ...f, password: e.target.value }))}
+                  required
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Button type="submit" variant="contained" color="primary" fullWidth>
+                  {authMode === 'login' ? 'Войти' : 'Зарегистрироваться'}
+                </Button>
+              </Grid>
+            </Grid>
+          </form>
+          <Button onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')} sx={{ mt: 2 }} fullWidth>
+            {authMode === 'login' ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'}
+          </Button>
+          {error && <Typography color="error" align="center" mt={2}>{DOMPurify.sanitize(error)}</Typography>}
+        </CardContent>
+      </Card>
+    </Box>
   );
 }
 

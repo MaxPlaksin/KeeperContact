@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { TextField, Button, Box, Grid, Typography } from '@mui/material';
 
 export default function ContactForm({ initial, onSave, loading }) {
   const [form, setForm] = useState({
@@ -28,18 +29,21 @@ export default function ContactForm({ initial, onSave, loading }) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input name="fio" type="text" placeholder="ФИО" value={form.fio} onChange={handleChange} required /> <br />
-      <input name="city" type="text" placeholder="Город" value={form.city} onChange={handleChange} /> <br />
-      <input name="position" type="text" placeholder="Должность" value={form.position} onChange={handleChange} /> <br />
-      <input name="birthday" type="text" placeholder="День рождения" value={form.birthday} onChange={handleChange} /> <br />
-      <input name="car" type="text" placeholder="Авто" value={form.car} onChange={handleChange} /> <br />
-      <input name="phones" type="text" placeholder="Телефоны (через запятую)" value={form.phones} onChange={handleChange} /> <br />
-      <input name="emails" type="text" placeholder="E-mail (через запятую)" value={form.emails} onChange={handleChange} /> <br />
-      <input name="notes" type="text" placeholder="Заметки" value={form.notes} onChange={handleChange} /> <br />
-      <input name="other" type="text" placeholder='Прочее (JSON: {"telegram":"@user"})' value={form.other} onChange={handleChange} /> <br />
-      <input name="photo" type="file" accept="image/*" onChange={handleChange} /> <br />
-      <button type="submit" disabled={loading}>{loading ? 'Сохраняю...' : 'Сохранить'}</button>
-    </form>
+    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 500, mx: 'auto', p: 2, bgcolor: '#fafafa', borderRadius: 2, boxShadow: 1 }}>
+      <Typography variant="h6" mb={2}>{initial ? 'Редактировать контакт' : 'Добавить контакт'}</Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12}><TextField name="fio" label="ФИО" value={form.fio} onChange={handleChange} required fullWidth /></Grid>
+        <Grid item xs={12}><TextField name="city" label="Город" value={form.city} onChange={handleChange} fullWidth /></Grid>
+        <Grid item xs={12}><TextField name="position" label="Должность" value={form.position} onChange={handleChange} fullWidth /></Grid>
+        <Grid item xs={12}><TextField name="birthday" label="День рождения" value={form.birthday} onChange={handleChange} fullWidth /></Grid>
+        <Grid item xs={12}><TextField name="car" label="Авто" value={form.car} onChange={handleChange} fullWidth /></Grid>
+        <Grid item xs={12}><TextField name="phones" label="Телефоны (через запятую)" value={form.phones} onChange={handleChange} fullWidth /></Grid>
+        <Grid item xs={12}><TextField name="emails" label="E-mail (через запятую)" value={form.emails} onChange={handleChange} fullWidth /></Grid>
+        <Grid item xs={12}><TextField name="notes" label="Заметки" value={form.notes} onChange={handleChange} fullWidth /></Grid>
+        <Grid item xs={12}><TextField name="other" label='Прочее (JSON: {"telegram":"@user"})' value={form.other} onChange={handleChange} fullWidth /></Grid>
+        <Grid item xs={12}><Button variant="contained" component="label" fullWidth>Загрузить фото<input name="photo" type="file" accept="image/*" hidden onChange={handleChange} /></Button></Grid>
+        <Grid item xs={12}><Button type="submit" variant="contained" color="primary" fullWidth disabled={loading}>{loading ? 'Сохраняю...' : 'Сохранить'}</Button></Grid>
+      </Grid>
+    </Box>
   );
 } 

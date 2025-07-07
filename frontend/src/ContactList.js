@@ -1,6 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import DOMPurify from 'dompurify';
 import { getPhotoUrl } from './api';
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Select, MenuItem, IconButton, Typography, InputLabel, FormControl } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function ContactList({ contacts, onEdit, onDelete }) {
   const [search, setSearch] = useState('');
@@ -38,44 +41,73 @@ export default function ContactList({ contacts, onEdit, onDelete }) {
   const uniqueCities = useMemo(() => Array.from(new Set(contacts.map(c => c.city).filter(Boolean))), [contacts]);
 
   return (
-    <div>
-      <div style={{ marginBottom: 12 }}>
-        <input placeholder="Поиск..." value={search} onChange={e => setSearch(e.target.value)} />
-        <select value={filterCity} onChange={e => setFilterCity(e.target.value)}>
-          <option value="">Все города</option>
-          {uniqueCities.map(city => <option key={city} value={city}>{city}</option>)}
-        </select>
-        <select value={sortField} onChange={e => setSortField(e.target.value)}>
-          <option value="fio">ФИО</option>
-          <option value="city">Город</option>
-          <option value="position">Должность</option>
-          <option value="birthday">День рождения</option>
-        </select>
-        <select value={sortDir} onChange={e => setSortDir(e.target.value)}>
-          <option value="asc">↑</option>
-          <option value="desc">↓</option>
-        </select>
-      </div>
-      <ul>
-        {filtered.map((contact) => (
-          <li key={contact.id} style={{ marginBottom: 16 }}>
-            <b>{contact.fio}</b>
-            {contact.city && <> — {contact.city}</>}
-            {contact.position && <> — {contact.position}</>}
-            {contact.birthday && <> — {contact.birthday}</>}
-            {contact.car && <> — {contact.car}</>}
-            {contact.photo && (
-              <div><img src={getPhotoUrl(contact.photo)} alt="Фото" style={{ maxWidth: 120, maxHeight: 120 }} /></div>
-            )}
-            {contact.notes && <div>Заметки: <span dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(contact.notes)}} /></div>}
-            {contact.phones && contact.phones.length > 0 && <div>Телефоны: {contact.phones.join(', ')}</div>}
-            {contact.emails && contact.emails.length > 0 && <div>Email: {contact.emails.join(', ')}</div>}
-            {contact.other && <div>Прочее: <span dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(JSON.stringify(contact.other))}} /></div>}
-            <button onClick={() => onEdit(contact)}>Редактировать</button>
-            <button onClick={() => onDelete(contact)}>Удалить</button>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Box sx={{ maxWidth: '100%', p: 2 }}>
+      <Typography variant="h5" mb={2}>Список контактов</Typography>
+      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+        <TextField label="Поиск" value={search} onChange={e => setSearch(e.target.value)} />
+        <FormControl sx={{ minWidth: 120 }}>
+          <InputLabel>Город</InputLabel>
+          <Select value={filterCity} label="Город" onChange={e => setFilterCity(e.target.value)}>
+            <MenuItem value="">Все города</MenuItem>
+            {uniqueCities.map(city => <MenuItem key={city} value={city}>{city}</MenuItem>)}
+          </Select>
+        </FormControl>
+        <FormControl sx={{ minWidth: 120 }}>
+          <InputLabel>Сортировка</InputLabel>
+          <Select value={sortField} label="Сортировка" onChange={e => setSortField(e.target.value)}>
+            <MenuItem value="fio">ФИО</MenuItem>
+            <MenuItem value="city">Город</MenuItem>
+            <MenuItem value="position">Должность</MenuItem>
+            <MenuItem value="birthday">День рождения</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl sx={{ minWidth: 80 }}>
+          <InputLabel>Порядок</InputLabel>
+          <Select value={sortDir} label="Порядок" onChange={e => setSortDir(e.target.value)}>
+            <MenuItem value="asc">↑</MenuItem>
+            <MenuItem value="desc">↓</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Фото</TableCell>
+              <TableCell>ФИО</TableCell>
+              <TableCell>Город</TableCell>
+              <TableCell>Должность</TableCell>
+              <TableCell>День рождения</TableCell>
+              <TableCell>Авто</TableCell>
+              <TableCell>Телефоны</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Заметки</TableCell>
+              <TableCell>Прочее</TableCell>
+              <TableCell>Действия</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filtered.map((contact) => (
+              <TableRow key={contact.id}>
+                <TableCell>{contact.photo && <img src={getPhotoUrl(contact.photo)} alt="Фото" style={{ maxWidth: 60, maxHeight: 60 }} />}</TableCell>
+                <TableCell>{contact.fio}</TableCell>
+                <TableCell>{contact.city}</TableCell>
+                <TableCell>{contact.position}</TableCell>
+                <TableCell>{contact.birthday}</TableCell>
+                <TableCell>{contact.car}</TableCell>
+                <TableCell>{contact.phones && contact.phones.join(', ')}</TableCell>
+                <TableCell>{contact.emails && contact.emails.join(', ')}</TableCell>
+                <TableCell><span dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(contact.notes)}} /></TableCell>
+                <TableCell><span dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(JSON.stringify(contact.other))}} /></TableCell>
+                <TableCell>
+                  <IconButton color="primary" onClick={() => onEdit(contact)}><EditIcon /></IconButton>
+                  <IconButton color="error" onClick={() => onDelete(contact)}><DeleteIcon /></IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 } 

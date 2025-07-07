@@ -150,7 +150,9 @@ def read_users_me(current_user: UserDB = Depends(get_current_user)):
 
 @app.post('/contacts/', response_model=Contact)
 def create_contact(contact: Contact, db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)):
-    db_contact = ContactDB(**contact.dict(exclude_unset=True), owner_id=current_user.id)
+    data = contact.dict(exclude_unset=True)
+    data.pop('owner_id', None)
+    db_contact = ContactDB(**data, owner_id=current_user.id)
     db.add(db_contact)
     db.commit()
     db.refresh(db_contact)
@@ -209,4 +211,8 @@ def get_photo(filename: str):
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Photo not found")
     from fastapi.responses import FileResponse
-    return FileResponse(file_path) 
+    return FileResponse(file_path)
+
+@app.get('/users/', response_model=List[User])
+def get_users(db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_admin)):
+    return db.query(UserDB).all() 

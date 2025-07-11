@@ -7,7 +7,10 @@ const ContactForm = ({ initialValues = {}, onSubmit, onCancel, loading }) => {
     fio: initialValues.fio || '',
     email: initialValues.email || '',
     phone: initialValues.phone || '',
+    city: initialValues.city || '',
+    birthday: initialValues.birthday || '', // новое поле
     photo: initialValues.photo || null,
+    // extra: initialValues.extra || '',
   });
   const [photoFile, setPhotoFile] = useState(null);
 
@@ -46,7 +49,38 @@ const ContactForm = ({ initialValues = {}, onSubmit, onCancel, loading }) => {
           value={form.phone}
           onChange={handleChange}
         />
+        <TextField
+          label="Город"
+          name="city"
+          value={form.city}
+          onChange={handleChange}
+        />
+        <TextField
+          label="Дата рождения"
+          name="birthday"
+          type="date"
+          value={form.birthday}
+          onChange={handleChange}
+          InputLabelProps={{ shrink: true }}
+        />
         <ContactPhotoUpload photoUrl={form.photo} onUpload={handlePhotoUpload} />
+        {/* Здесь можно добавить дополнительные поля/виджеты для агрегатора информации */}
+        <TextField
+          label="Заметки"
+          name="notes"
+          value={form.notes || ''}
+          onChange={handleChange}
+          multiline
+          minRows={2}
+        />
+        <TextField
+          label="Теги (через запятую)"
+          name="tags"
+          value={form.tags || ''}
+          onChange={handleChange}
+          placeholder="например: друг, коллега, vip"
+        />
+        {/* Файлы и история — можно добавить позже */}
         <Stack direction="row" spacing={2}>
           <Button type="submit" variant="contained" color="primary" disabled={loading}>
             Сохранить

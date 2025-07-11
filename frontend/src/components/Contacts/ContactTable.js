@@ -6,6 +6,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DownloadIcon from '@mui/icons-material/Download';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 
 const ContactTable = ({ contacts, onEdit, onDelete, onExport, onImport, onSort, sortBy, sortOrder }) => {
   const handleSort = (field) => {
@@ -48,6 +51,8 @@ const ContactTable = ({ contacts, onEdit, onDelete, onExport, onImport, onSort, 
                   onClick={() => handleSort('phone')}
                 >Телефон</TableSortLabel>
               </TableCell>
+              <TableCell>Город</TableCell>
+              <TableCell>День рождения</TableCell>
               <TableCell align="right">Действия</TableCell>
             </TableRow>
           </TableHead>
@@ -60,6 +65,8 @@ const ContactTable = ({ contacts, onEdit, onDelete, onExport, onImport, onSort, 
                 <TableCell>{contact.fio}</TableCell>
                 <TableCell>{contact.email}</TableCell>
                 <TableCell>{contact.phone}</TableCell>
+                <TableCell>{contact.city}</TableCell>
+                <TableCell>{contact.birthday}</TableCell>
                 <TableCell align="right">
                   <Tooltip title="Редактировать">
                     <IconButton onClick={() => onEdit(contact)} color="primary">
@@ -71,6 +78,8 @@ const ContactTable = ({ contacts, onEdit, onDelete, onExport, onImport, onSort, 
                       <DeleteIcon />
                     </IconButton>
                   </Tooltip>
+                  {/* Кнопка доп. меню */}
+                  <MoreMenu contact={contact} />
                 </TableCell>
               </TableRow>
             ))}
@@ -80,5 +89,29 @@ const ContactTable = ({ contacts, onEdit, onDelete, onExport, onImport, onSort, 
     </Paper>
   );
 };
+
+// Кнопка и меню дополнительных действий
+function MoreMenu({ contact }) {
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  return (
+    <>
+      <IconButton onClick={handleClick}>
+        <MoreVertIcon />
+      </IconButton>
+      <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+        <MenuItem onClick={handleClose}>Добавить заметку</MenuItem>
+        <MenuItem onClick={handleClose}>История</MenuItem>
+        <MenuItem onClick={handleClose}>Теги</MenuItem>
+      </Menu>
+    </>
+  );
+}
 
 export default ContactTable; 

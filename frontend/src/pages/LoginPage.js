@@ -3,18 +3,27 @@ import LoginForm from '../components/Auth/LoginForm';
 import Notification from '../components/Layout/Notification';
 import { getProfile } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Fade, Paper } from '@mui/material';
+import { Box, Fade, Paper } from '@mui/material';
 
-// Импортируем картинку для фона (поместите её в public/bg.jpg или аналогично)
-// import bgImage from '../../public/bg.jpg'; // если через import, иначе используем url
+const gifBackgrounds = [
+  '/slider/20250708_1719_Mountain Drilling Adventure_simple_compose_01jzn6fxyqfjtsjv67nh5nzmfx.gif',
+  '/slider/20250708_1719_Mountain Drilling Adventure_simple_compose_01jzn6fxytfz998djw7ayzpdp2.gif',
+  '/slider/20250708_1745_Drilling Rig Journey_simple_compose_01jzn80236erra0jt6ks3cfpt9.gif',
+  '/slider/20250708_1745_Drilling Rig Journey_simple_compose_01jzn8022zf70byma587xr2e2q.gif',
+];
 
 const LoginPage = ({ onLogin }) => {
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
   const [show, setShow] = useState(false);
+  const [bgIdx, setBgIdx] = useState(0);
   const navigate = useNavigate();
 
   React.useEffect(() => {
     setShow(true);
+    const interval = setInterval(() => {
+      setBgIdx((prev) => (prev + 1) % gifBackgrounds.length);
+    }, 6000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleLogin = async (data) => {
@@ -37,46 +46,40 @@ const LoginPage = ({ onLogin }) => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        zIndex: 10,
-        backgroundImage: 'url("/bg.jpg")', // Положите картинку в public/bg.jpg
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        bgcolor: 'rgba(0,0,0,0.7)',
+        background: '#19253d',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
-      <Box sx={{ width: '100%', maxWidth: 440, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography
-          variant="h1"
-          fontWeight={900}
+      {/* Фоновые гифки */}
+      {gifBackgrounds.map((gif, idx) => (
+        <Box
+          key={gif}
           sx={{
-            mb: 5,
-            letterSpacing: 2,
-            textAlign: 'center',
-            color: '#FFD600',
-            textShadow: `0 2px 8px #000, 0 0 2px #fff, 2px 2px 0 #000, 0 0 16px #FFD600`,
-            WebkitTextStroke: '2px #000',
-            fontFamily: 'Roboto, Arial, sans-serif',
-            userSelect: 'none',
-            borderRadius: 2,
-            px: 2,
-            background: 'rgba(255,255,255,0.05)',
-            boxShadow: '0 4px 32px 0 rgba(0,0,0,0.25)',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            zIndex: 0,
+            opacity: bgIdx === idx ? 1 : 0,
+            transition: 'opacity 1s',
+            backgroundImage: `linear-gradient(120deg, #19253dCC 0%, #19253d99 100%), url('${gif}')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
           }}
-        >
-          Алмазгеобур
-        </Typography>
+        />
+      ))}
+      <Box sx={{ position: 'relative', zIndex: 10, width: '100%', maxWidth: 400 }}>
         <Fade in={show} timeout={700}>
           <Paper elevation={8} sx={{
             p: 4,
             width: '100%',
-            bgcolor: 'rgba(255,255,255,0.92)',
-            border: '2px solid #FFD600',
+            bgcolor: '#fff',
+            border: '2px solid #ffc700',
             borderRadius: 4,
-            boxShadow: '0 8px 32px 0 rgba(0,0,0,0.25)',
+            boxShadow: '0 8px 32px 0 rgba(25,37,61,0.10)',
             backdropFilter: 'blur(2px)',
           }}>
             <LoginForm onLogin={handleLogin} />

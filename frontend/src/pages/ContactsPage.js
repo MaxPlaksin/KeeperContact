@@ -26,6 +26,7 @@ const ContactsPage = ({ user }) => {
       const params = { ...filter, sort_by: sortBy, sort_order: sortOrder };
       const data = await getContacts(token, params);
       setContacts(data);
+      window.contactsForSidebar = data;
     } catch (err) {
       setNotification({ open: true, message: 'Ошибка загрузки контактов', severity: 'error' });
     } finally {

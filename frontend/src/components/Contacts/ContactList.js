@@ -1,21 +1,22 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import ContactFilter from './ContactFilter';
 import ContactTable from './ContactTable';
 import Notification from '../Layout/Notification';
 
 const ContactList = ({
-  contacts,
-  filterValues,
-  onFilter,
-  onEdit,
-  onDelete,
-  onExport,
-  onImport,
-  onSort,
-  sortBy,
-  sortOrder,
-  notification,
-  onCloseNotification
+  contacts = [],
+  filterValues = {},
+  onFilter = () => {},
+  onEdit = () => {},
+  onDelete = () => {},
+  onExport = () => {},
+  onImport = () => {},
+  onSort = () => {},
+  sortBy = '',
+  sortOrder = 'asc',
+  notification = { open: false, message: '', severity: 'info' },
+  onCloseNotification = () => {},
 }) => {
   return (
     <>
@@ -40,4 +41,23 @@ const ContactList = ({
   );
 };
 
-export default ContactList; 
+ContactList.propTypes = {
+  contacts: PropTypes.array,
+  filterValues: PropTypes.object,
+  onFilter: PropTypes.func,
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func,
+  onExport: PropTypes.func,
+  onImport: PropTypes.func,
+  onSort: PropTypes.func,
+  sortBy: PropTypes.string,
+  sortOrder: PropTypes.oneOf(['asc', 'desc']),
+  notification: PropTypes.shape({
+    open: PropTypes.bool,
+    message: PropTypes.string,
+    severity: PropTypes.string,
+  }),
+  onCloseNotification: PropTypes.func,
+};
+
+export default ContactList;

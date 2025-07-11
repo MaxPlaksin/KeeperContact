@@ -1,23 +1,24 @@
 from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy import create_engine, Column, Integer, String, JSON, ForeignKey, Boolean
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-import os
-import shutil
 from fastapi.middleware.cors import CORSMiddleware
+from config import get_settings
+from logging_config import logging
 
-DATABASE_URL = 'sqlite:///./contacts.db'
-SECRET_KEY = 'supersecretkey'  # В проде вынести в env
-ALGORITHM = 'HS256'
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
-UPLOAD_DIR = './photos'
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+settings = get_settings()
+
+DATABASE_URL = settings.DATABASE_URL
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
+UPLOAD_DIR = settings.UPLOAD_DIR
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -45,6 +46,7 @@ class ContactDB(Base):
     phones = Column(JSON, nullable=True)
     emails = Column(JSON, nullable=True)
     notes = Column(String, nullable=True)
+    tags = Column(JSON, nullable=True)  # Новое поле для тегов
     other = Column(JSON, nullable=True)
     photo = Column(String, nullable=True)
     owner_id = Column(Integer, ForeignKey('users.id'))
@@ -57,7 +59,7 @@ class User(BaseModel):
     username: str
     is_admin: bool = False
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserCreate(BaseModel):
     username: str
@@ -77,11 +79,12 @@ class Contact(BaseModel):
     phones: Optional[List[str]] = None
     emails: Optional[List[str]] = None
     notes: Optional[str] = None
+    tags: Optional[List[str]] = None
     other: Optional[Dict[str, Any]] = None
     photo: Optional[str] = None
     owner_id: Optional[int] = None
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 def get_db():
     db = SessionLocal()

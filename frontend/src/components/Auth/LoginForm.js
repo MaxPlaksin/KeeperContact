@@ -34,6 +34,22 @@ const LoginForm = ({ onLogin }) => {
         fullWidth
         required
         margin="normal"
+        InputProps={{
+          style: {
+            fontSize: '1.25rem',
+            color: '#19253d',
+            fontWeight: 600,
+            background: '#f5f5f5',
+            padding: '14px 16px',
+          },
+        }}
+        InputLabelProps={{
+          style: {
+            fontSize: '1.1rem',
+            color: '#19253d',
+            fontWeight: 700,
+          },
+        }}
       />
       <TextField
         label="Пароль"
@@ -43,6 +59,22 @@ const LoginForm = ({ onLogin }) => {
         fullWidth
         required
         margin="normal"
+        InputProps={{
+          style: {
+            fontSize: '1.25rem',
+            color: '#19253d',
+            fontWeight: 600,
+            background: '#f5f5f5',
+            padding: '14px 16px',
+          },
+        }}
+        InputLabelProps={{
+          style: {
+            fontSize: '1.1rem',
+            color: '#19253d',
+            fontWeight: 700,
+          },
+        }}
       />
       <Button
         type="submit"
@@ -50,7 +82,7 @@ const LoginForm = ({ onLogin }) => {
         color="primary"
         fullWidth
         disabled={loading}
-        sx={{ mt: 2 }}
+        sx={{ mt: 3, fontSize: '1.15rem', fontWeight: 700, py: 1.5, borderRadius: 2 }}
       >
         Войти
       </Button>

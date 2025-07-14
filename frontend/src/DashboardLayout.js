@@ -20,7 +20,7 @@ const menu = [
   { label: "Выход", icon: <LogoutIcon />, path: "/logout" },
 ];
 
-export default function DashboardLayout() {
+export default function DashboardLayout({ user, onLogout }) {
   const navigate = useNavigate();
 
   return (
@@ -46,7 +46,13 @@ export default function DashboardLayout() {
           {menu.map((item) => (
             <ListItemButton
               key={item.label}
-              onClick={() => navigate(item.path)}
+              onClick={() => {
+                if (item.path === "/logout") {
+                  onLogout && onLogout();
+                } else {
+                  navigate(item.path);
+                }
+              }}
               sx={{
                 borderRadius: "8px",
                 mx: 1,
@@ -62,6 +68,13 @@ export default function DashboardLayout() {
             </ListItemButton>
           ))}
         </List>
+        {/* Можно добавить отображение пользователя */}
+        <Box sx={{ p: 2, color: '#fff' }}>
+          <Typography variant="subtitle1">{user?.username}</Typography>
+          <Typography variant="caption" color="#ffc700">
+            {user?.is_admin ? 'Администратор' : 'Пользователь'}
+          </Typography>
+        </Box>
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />

@@ -11,6 +11,12 @@ from datetime import datetime, timedelta
 from fastapi.middleware.cors import CORSMiddleware
 from config import get_settings
 from logging_config import logging
+import os
+import shutil
+from sqlalchemy.sql import expression
+import time
+import psycopg2
+from sqlalchemy.exc import OperationalError
 
 settings = get_settings()
 
@@ -20,7 +26,7 @@ ALGORITHM = settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 UPLOAD_DIR = settings.UPLOAD_DIR
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -113,20 +119,55 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        username = str(payload.get("sub", ""))
+        if not username:
+            logging.error("JWT decode: username is None or empty")
             raise credentials_exception
-    except JWTError:
+    except JWTError as e:
+        logging.error(f"JWTError: {e}")
         raise credentials_exception
     user = db.query(UserDB).filter(UserDB.username == username).first()
     if user is None:
+        logging.error(f"User not found: {username}")
         raise credentials_exception
     return user
 
 def get_current_admin(current_user: UserDB = Depends(get_current_user)):
-    if not current_user.is_admin:
+    if not (current_user.is_admin == True):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return current_user
+
+def wait_for_postgres():
+    db_url = os.getenv('DATABASE_URL')
+    if not db_url:
+        print('DATABASE_URL не задан!')
+        return
+    for _ in range(30):
+        try:
+            # Преобразуем SQLAlchemy URL в DSN для psycopg2
+            import re
+            m = re.match(r'postgresql\+psycopg2://(.*?):(.*?)@(.*?):(\d+)/(.*)', db_url)
+            if not m:
+                print('DATABASE_URL не распознан:', db_url)
+                return
+            user, password, host, port, db = m.groups()
+            conn = psycopg2.connect(
+                dbname=db,
+                user=user,
+                password=password,
+                host=host,
+                port=port,
+            )
+            conn.close()
+            print('PostgreSQL доступен!')
+            return
+        except Exception as e:
+            print(f'Ожидание PostgreSQL... {e}')
+            time.sleep(2)
+    print('Не удалось подключиться к PostgreSQL, выход.')
+    exit(1)
+
+wait_for_postgres()
 
 app = FastAPI()
 
@@ -177,21 +218,23 @@ def create_contact(contact: Contact, db: Session = Depends(get_db), current_user
 
 @app.get('/contacts/', response_model=List[Contact])
 def read_contacts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)):
-    if current_user.is_admin:
+    if db.query(UserDB).filter(UserDB.id == current_user.id, UserDB.is_admin == expression.true()).first():
         return db.query(ContactDB).offset(skip).limit(limit).all()
     return db.query(ContactDB).filter(ContactDB.owner_id == current_user.id).offset(skip).limit(limit).all()
 
 @app.get('/contacts/{contact_id}', response_model=Contact)
 def read_contact(contact_id: int, db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)):
     contact = db.query(ContactDB).filter(ContactDB.id == contact_id).first()
-    if not contact or (not current_user.is_admin and contact.owner_id != current_user.id):
+    is_admin = db.query(UserDB).filter(UserDB.id == current_user.id, UserDB.is_admin == expression.true()).first()
+    if not contact or (is_admin is None and contact.owner_id != current_user.id):
         raise HTTPException(status_code=404, detail="Contact not found")
     return contact
 
 @app.put('/contacts/{contact_id}', response_model=Contact)
 def update_contact(contact_id: int, contact: Contact, db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)):
     db_contact = db.query(ContactDB).filter(ContactDB.id == contact_id).first()
-    if not db_contact or (not current_user.is_admin and db_contact.owner_id != current_user.id):
+    is_admin = db.query(UserDB).filter(UserDB.id == current_user.id, UserDB.is_admin == expression.true()).first()
+    if not db_contact or (is_admin is None and db_contact.owner_id != current_user.id):
         raise HTTPException(status_code=404, detail="Contact not found")
     for key, value in contact.dict(exclude_unset=True).items():
         setattr(db_contact, key, value)
@@ -202,7 +245,8 @@ def update_contact(contact_id: int, contact: Contact, db: Session = Depends(get_
 @app.delete('/contacts/{contact_id}')
 def delete_contact(contact_id: int, db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)):
     db_contact = db.query(ContactDB).filter(ContactDB.id == contact_id).first()
-    if not db_contact or (not current_user.is_admin and db_contact.owner_id != current_user.id):
+    is_admin = db.query(UserDB).filter(UserDB.id == current_user.id, UserDB.is_admin == expression.true()).first()
+    if not db_contact or (is_admin is None and db_contact.owner_id != current_user.id):
         raise HTTPException(status_code=404, detail="Contact not found")
     db.delete(db_contact)
     db.commit()
@@ -211,13 +255,14 @@ def delete_contact(contact_id: int, db: Session = Depends(get_db), current_user:
 @app.post('/contacts/{contact_id}/photo')
 def upload_photo(contact_id: int, file: UploadFile = File(...), db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)):
     db_contact = db.query(ContactDB).filter(ContactDB.id == contact_id).first()
-    if not db_contact or (not current_user.is_admin and db_contact.owner_id != current_user.id):
+    is_admin = db.query(UserDB).filter(UserDB.id == current_user.id, UserDB.is_admin == expression.true()).first()
+    if not db_contact or (is_admin is None and db_contact.owner_id != current_user.id):
         raise HTTPException(status_code=404, detail="Contact not found")
     filename = f"contact_{contact_id}_{file.filename}"
     file_path = os.path.join(UPLOAD_DIR, filename)
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-    db_contact.photo = filename
+    setattr(db_contact, 'photo', filename)
     db.commit()
     db.refresh(db_contact)
     return {"filename": filename}

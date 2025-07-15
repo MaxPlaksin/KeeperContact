@@ -19,7 +19,7 @@ const Navbar = ({ user, onLogout }) => {
         {user ? (
           <>
             <Button color="inherit" component={Link} to="/contacts">Контакты</Button>
-            {user.role === 'admin' && (
+            {user.is_admin === true && (
               <Button color="inherit" component={Link} to="/users">Пользователи</Button>
             )}
             <Button color="inherit" onClick={handleLogout}>Выйти</Button>

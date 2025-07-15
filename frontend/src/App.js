@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import { getUser, logout } from './utils/auth';
+import ProtectedRoute from './components/Layout/ProtectedRoute';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -29,7 +30,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route element={<DashboardLayout user={user} onLogout={handleLogout} />}>
+        <Route element={<ProtectedRoute user={user}><DashboardLayout user={user} onLogout={handleLogout} /></ProtectedRoute>}>
           <Route path="/contacts" element={<ContactList user={user} />} />
           <Route path="/add-card" element={<ContactForm user={user} />} />
           <Route path="/profile" element={<div>Профиль</div>} />

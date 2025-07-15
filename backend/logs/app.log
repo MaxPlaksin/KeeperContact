@@ -16,3 +16,36 @@ Traceback (most recent call last):
     version = _bcrypt.__about__.__version__
               ^^^^^^^^^^^^^^^^^
 AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-07-15 12:15:20,466 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-07-15 12:15:20,791 - root - INFO - get_current_user: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMiIsImV4cCI6MTc1MjY2ODEyMH0.I7l-PDQox0_DGujEJXV60NkYfNli8cXvw3F8ts5JiV8
+2025-07-15 12:15:20,794 - root - INFO - get_current_user: payload={'sub': 'user2', 'exp': 1752668120}, username=user2
+2025-07-15 12:15:20,797 - root - INFO - /users/me: current_user=<main.UserDB object at 0x7f58b6bf5450>
+2025-07-15 12:15:22,342 - root - INFO - get_current_user: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMiIsImV4cCI6MTc1MjY2ODEyMn0.i7tr_TWDTQNhbPdjifww1Wz2Uz6uqx4SUzEhzrtuT7Q
+2025-07-15 12:15:22,344 - root - INFO - get_current_user: payload={'sub': 'user2', 'exp': 1752668122}, username=user2
+2025-07-15 12:15:22,348 - root - INFO - /users/me: current_user=<main.UserDB object at 0x7f58b6bfdb10>
+2025-07-15 12:40:30,162 - root - INFO - get_current_user: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmRyZXkiLCJleHAiOjE3NTI2Njk2MzB9.AfKQDCVSybC_RsERDYSPrAw6woQz5lG-Oa7EGnkJKL4
+2025-07-15 12:40:30,176 - root - INFO - get_current_user: payload={'sub': 'andrey', 'exp': 1752669630}, username=andrey
+2025-07-15 12:40:30,180 - root - INFO - /users/me: current_user=<main.UserDB object at 0x7f58b6bfd2d0>
+2025-07-15 12:40:31,243 - root - INFO - get_current_user: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmRyZXkiLCJleHAiOjE3NTI2Njk2MzF9.dXy0d5-uUsUeM-aMUb2hTpjRmWBxN7qAkCuCAdYj5C0
+2025-07-15 12:40:31,245 - root - INFO - get_current_user: payload={'sub': 'andrey', 'exp': 1752669631}, username=andrey
+2025-07-15 12:40:31,248 - root - INFO - /users/me: current_user=<main.UserDB object at 0x7f58b67a5510>
+2025-07-15 12:40:31,857 - root - INFO - get_current_user: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmRyZXkiLCJleHAiOjE3NTI2Njk2MzF9.dXy0d5-uUsUeM-aMUb2hTpjRmWBxN7qAkCuCAdYj5C0
+2025-07-15 12:40:31,860 - root - INFO - get_current_user: payload={'sub': 'andrey', 'exp': 1752669631}, username=andrey
+2025-07-15 12:40:31,863 - root - INFO - /users/me: current_user=<main.UserDB object at 0x7f58b6bdc750>
+2025-07-15 12:41:34,529 - root - INFO - get_current_user: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMiIsImV4cCI6MTc1MjY2OTY5NH0._KtflYRpe3RQZlImmrh5APfrQn-fAHkzG_oD1JtWYwI
+2025-07-15 12:41:34,533 - root - INFO - get_current_user: payload={'sub': 'user2', 'exp': 1752669694}, username=user2
+2025-07-15 12:41:34,537 - root - INFO - /users/me: current_user=<main.UserDB object at 0x7f58b6bf5f50>
+2025-07-15 12:42:10,601 - root - INFO - get_current_user: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMyIsImV4cCI6MTc1MjY2OTczMH0._o2Xf1WFR0T4a_dWD86QURf09w_hFHFtpSfmSQTF8k4
+2025-07-15 12:42:10,605 - root - INFO - get_current_user: payload={'sub': 'user3', 'exp': 1752669730}, username=user3
+2025-07-15 12:42:10,611 - root - INFO - /users/me: current_user=<main.UserDB object at 0x7f58b67f2050>
+2025-07-15 12:42:29,262 - root - INFO - get_current_user: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMyIsImV4cCI6MTc1MjY2OTc0OX0.WJqmQdOxkgTTX8XzT8z4s_tTA9AulvaPeikGqjSnumc
+2025-07-15 12:42:29,266 - root - INFO - get_current_user: payload={'sub': 'user3', 'exp': 1752669749}, username=user3
+2025-07-15 12:42:29,272 - root - INFO - /users/me: current_user=<main.UserDB object at 0x7f58b67f2a90>
+2025-07-15 12:42:54,762 - root - INFO - get_current_user: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMyIsImV4cCI6MTc1MjY2OTc3NH0.7XAgD_q1TFyZ1w9e5hxReYZaBLH6XiSY3vsxhyEfhcs
+2025-07-15 12:42:54,770 - root - INFO - get_current_user: payload={'sub': 'user3', 'exp': 1752669774}, username=user3
+2025-07-15 12:42:54,775 - root - INFO - /users/me: current_user=<main.UserDB object at 0x7f58b67f2e90>

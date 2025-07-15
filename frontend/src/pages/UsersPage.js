@@ -37,8 +37,8 @@ const UsersPage = () => {
             {users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell>{user.id}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.role}</TableCell>
+                <TableCell>{user.username}</TableCell>
+                <TableCell>{user.is_admin ? 'Администратор' : 'Пользователь'}</TableCell>
               </TableRow>
             ))}
           </TableBody>

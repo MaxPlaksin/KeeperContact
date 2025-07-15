@@ -10,13 +10,17 @@ const LoginForm = ({ onLogin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!username || !password) {
+      setError('Введите логин и пароль');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
       const data = await login(username, password);
       onLogin(data);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Ошибка входа');
+      setError(err.response?.data?.detail || 'Неверный логин или пароль');
     } finally {
       setLoading(false);
     }

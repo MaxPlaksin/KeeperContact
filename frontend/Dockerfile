@@ -2,6 +2,7 @@ FROM node:20-alpine as build
 WORKDIR /app
 COPY package*.json ./
 RUN npm config set strict-ssl false && npm install
+COPY .env ./
 COPY . .
 RUN npm run build
 

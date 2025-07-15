@@ -17,6 +17,8 @@ from sqlalchemy.sql import expression
 import time
 import psycopg2
 from sqlalchemy.exc import OperationalError
+from fastapi.responses import JSONResponse
+from fastapi import APIRouter
 
 settings = get_settings()
 
@@ -112,18 +114,21 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    import logging
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        logging.info(f"get_current_user: token={token}")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username = str(payload.get("sub", ""))
+        logging.info(f"get_current_user: payload={payload}, username={username}")
         if not username:
             logging.error("JWT decode: username is None or empty")
             raise credentials_exception
-    except JWTError as e:
+    except Exception as e:
         logging.error(f"JWTError: {e}")
         raise credentials_exception
     user = db.query(UserDB).filter(UserDB.username == username).first()
@@ -133,7 +138,7 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
     return user
 
 def get_current_admin(current_user: UserDB = Depends(get_current_user)):
-    if not (current_user.is_admin == True):
+    if not (current_user.is_admin is True):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return current_user
 
@@ -204,7 +209,13 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
 @app.get('/users/me', response_model=User)
 def read_users_me(current_user: UserDB = Depends(get_current_user)):
-    return current_user
+    import logging
+    try:
+        logging.info(f"/users/me: current_user={current_user}")
+        return current_user
+    except Exception as e:
+        logging.error(f"/users/me error: {e}")
+        return JSONResponse(status_code=401, content={"detail": "Could not validate credentials"})
 
 @app.post('/contacts/', response_model=Contact)
 def create_contact(contact: Contact, db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)):
@@ -218,23 +229,24 @@ def create_contact(contact: Contact, db: Session = Depends(get_db), current_user
 
 @app.get('/contacts/', response_model=List[Contact])
 def read_contacts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)):
-    if db.query(UserDB).filter(UserDB.id == current_user.id, UserDB.is_admin == expression.true()).first():
+    is_admin = db.query(UserDB).filter(UserDB.id == current_user.id, UserDB.is_admin.is_(True)).first() is not None
+    if is_admin:
         return db.query(ContactDB).offset(skip).limit(limit).all()
     return db.query(ContactDB).filter(ContactDB.owner_id == current_user.id).offset(skip).limit(limit).all()
 
 @app.get('/contacts/{contact_id}', response_model=Contact)
 def read_contact(contact_id: int, db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)):
     contact = db.query(ContactDB).filter(ContactDB.id == contact_id).first()
-    is_admin = db.query(UserDB).filter(UserDB.id == current_user.id, UserDB.is_admin == expression.true()).first()
-    if not contact or (is_admin is None and contact.owner_id != current_user.id):
+    is_admin = db.query(UserDB).filter(UserDB.id == current_user.id, UserDB.is_admin.is_(True)).first() is not None
+    if not contact or (not is_admin and contact.owner_id != current_user.id):
         raise HTTPException(status_code=404, detail="Contact not found")
     return contact
 
 @app.put('/contacts/{contact_id}', response_model=Contact)
 def update_contact(contact_id: int, contact: Contact, db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)):
     db_contact = db.query(ContactDB).filter(ContactDB.id == contact_id).first()
-    is_admin = db.query(UserDB).filter(UserDB.id == current_user.id, UserDB.is_admin == expression.true()).first()
-    if not db_contact or (is_admin is None and db_contact.owner_id != current_user.id):
+    is_admin = db.query(UserDB).filter(UserDB.id == current_user.id, UserDB.is_admin.is_(True)).first() is not None
+    if not db_contact or (not is_admin and db_contact.owner_id != current_user.id):
         raise HTTPException(status_code=404, detail="Contact not found")
     for key, value in contact.dict(exclude_unset=True).items():
         setattr(db_contact, key, value)
@@ -245,8 +257,8 @@ def update_contact(contact_id: int, contact: Contact, db: Session = Depends(get_
 @app.delete('/contacts/{contact_id}')
 def delete_contact(contact_id: int, db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)):
     db_contact = db.query(ContactDB).filter(ContactDB.id == contact_id).first()
-    is_admin = db.query(UserDB).filter(UserDB.id == current_user.id, UserDB.is_admin == expression.true()).first()
-    if not db_contact or (is_admin is None and db_contact.owner_id != current_user.id):
+    is_admin = db.query(UserDB).filter(UserDB.id == current_user.id, UserDB.is_admin.is_(True)).first() is not None
+    if not db_contact or (not is_admin and db_contact.owner_id != current_user.id):
         raise HTTPException(status_code=404, detail="Contact not found")
     db.delete(db_contact)
     db.commit()
@@ -255,8 +267,8 @@ def delete_contact(contact_id: int, db: Session = Depends(get_db), current_user:
 @app.post('/contacts/{contact_id}/photo')
 def upload_photo(contact_id: int, file: UploadFile = File(...), db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)):
     db_contact = db.query(ContactDB).filter(ContactDB.id == contact_id).first()
-    is_admin = db.query(UserDB).filter(UserDB.id == current_user.id, UserDB.is_admin == expression.true()).first()
-    if not db_contact or (is_admin is None and db_contact.owner_id != current_user.id):
+    is_admin = db.query(UserDB).filter(UserDB.id == current_user.id, UserDB.is_admin.is_(True)).first() is not None
+    if not db_contact or (not is_admin and db_contact.owner_id != current_user.id):
         raise HTTPException(status_code=404, detail="Contact not found")
     filename = f"contact_{contact_id}_{file.filename}"
     file_path = os.path.join(UPLOAD_DIR, filename)
@@ -277,4 +289,11 @@ def get_photo(filename: str):
 
 @app.get('/users/', response_model=List[User])
 def get_users(db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_admin)):
-    return db.query(UserDB).all() 
+    return db.query(UserDB).all()
+
+@app.get("/debug/users")
+def debug_get_users():
+    from main import get_db
+    db = next(get_db())
+    users = db.execute("SELECT username, password FROM users").fetchall()
+    return JSONResponse(content=[{"username": u[0], "password": u[1]} for u in users]) 
